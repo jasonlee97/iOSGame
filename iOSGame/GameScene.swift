@@ -16,6 +16,11 @@ var myLabel: SKLabelNode!
 
 class GameScene: SKScene {
     
+    var purpleFlyingFrames: [SKTexture]!
+    var purpleAnimation: SKAction?
+    
+    var isOriginalBg: Bool?
+    
     var swipeDirection = ""
     
     var pauseButton: SKSpriteNode! = nil
@@ -26,7 +31,7 @@ class GameScene: SKScene {
     let Circle1 = SKSpriteNode(imageNamed: "barn")
     let Circle2 = SKSpriteNode(imageNamed: "barn")
     let Circle3 = SKSpriteNode(imageNamed: "barn")
-    let background = SKSpriteNode(imageNamed: "grass-background.jpg") // background image on the gameplay
+    var background = SKSpriteNode(imageNamed: "grass-background.jpg") // background image on the gameplay
     var arrayChickens:[SKSpriteNode] = []
     var arrayPositions:[String] = []
     let numberOfChickens = 5
@@ -50,6 +55,18 @@ class GameScene: SKScene {
         initTimer()
         
         addSwipeRecognizers(view)
+        
+        purpleFlyingFrames = []
+        for i in 1 ... 6 {
+            purpleFlyingFrames.append(SKTexture(imageNamed: "purple\(i)"))
+        }
+        
+        purpleAnimation = SKAction.animate(with: purpleFlyingFrames, timePerFrame: 0.05)
+        
+        chicken.run(SKAction.repeatForever(purpleAnimation!))
+        for chickenNode in arrayChickens {
+            chickenNode.run(SKAction.repeatForever(purpleAnimation!))
+        }
     }
     
     func addSwipeRecognizers(_ view: SKView) {
@@ -65,6 +82,8 @@ class GameScene: SKScene {
         swipeDown.direction = .down
         view.addGestureRecognizer(swipeDown)
     }
+    
+    
     
     func addPauseButton() {
         pauseButton = SKSpriteNode(imageNamed: "pause")
@@ -182,7 +201,6 @@ class GameScene: SKScene {
             arrayPositions.append(chickenPosition)
             chicken.zPosition = 2
             addChild(chicken)
-
         }
     }
     
@@ -208,6 +226,8 @@ class GameScene: SKScene {
         
         chicken.zPosition = 2
         addChild(chicken)
+        
+        chicken.run(SKAction.repeatForever(purpleAnimation!))
 
     }
     
@@ -295,17 +315,18 @@ class GameScene: SKScene {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        //repeat to add bullet when touch beginning
-        /*
-        if !gameLayer.isPaused {
-            run(SKAction.repeatForever(
-                SKAction.sequence([
-                    SKAction.run(addBullet),
-                    SKAction.wait(forDuration: 0.1)
-                    ])
-            ), withKey: "shootingBullets")
+        if let _ = isOriginalBg {
+        } else {
+            isOriginalBg = true
         }
-        */
+        
+        if isOriginalBg! {
+            background.texture = SKTexture(imageNamed: "pink-background.jpg")
+        } else {
+            background.texture = SKTexture(imageNamed: "grass-background.jpg")
+        }
+        
+        isOriginalBg! = !isOriginalBg!
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
